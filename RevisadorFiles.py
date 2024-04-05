@@ -55,6 +55,7 @@ def encontrar_nombre_en_texto(texto):
 
 def procesar_pdfs(ruta_pdfs, prefijo):
     os.chdir(ruta_pdfs)
+    contador  = 0
     for archivo in os.listdir('.'):
         if archivo.endswith('.pdf'):
             try:
@@ -78,8 +79,14 @@ def procesar_pdfs(ruta_pdfs, prefijo):
                     else:
                         nombre_archivo = f"{nombre}.pdf"
                     destino_pdf = os.path.join(carpeta_nombre, nombre_archivo)
+
+                    # Si por algun error en los patrones el archivo ya existe entonces se guarda el siguiente archivo solo con el nombre el estudiante y algun contador
+                    if os.path.exists(destino_pdf):
+                        nombre_archivo = f"{nombre}_{contador}.pdf"
+                        destino_pdf = os.path.join(carpeta_nombre, nombre_archivo)
                     shutil.move(archivo, destino_pdf)
                     print(f"Archivo {archivo} procesado y movido a {destino_pdf}.")
+                    contador += 1 #
             except Exception as e:
                 print(f"Error procesando archivo {archivo}: {e}")
 
