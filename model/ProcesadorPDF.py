@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import shutil
@@ -5,16 +6,16 @@ import zipfile
 
 import unicodedata
 from PyPDF2 import PdfReader
-import logging
+
 
 class ProcesadorPDF:
+
     def __init__(self, configuracion, log_path):
         self.configuracion = configuracion
         # Configura el logging para capturar información y errores.
         destino_log = os.path.join(log_path, 'rocesador_documentos.log')
         logging.basicConfig(filename=destino_log, level=logging.INFO,
                             format='%(asctime)s:%(levelname)s:%(message)s')
-
 
     def normalizar_nombre(self, nombre):
         """
@@ -71,24 +72,24 @@ class ProcesadorPDF:
             for archivo in os.listdir('.'):
                 if archivo.endswith('.pdf'):
 
-                        reader = PdfReader(archivo)
-                        texto = ''
-                        for pagina in reader.pages:
-                            texto += pagina.extract_text()
+                    reader = PdfReader(archivo)
+                    texto = ''
+                    for pagina in reader.pages:
+                        texto += pagina.extract_text()
 
-                        encontro_nombre = False
-                        for parametro in self.configuracion.parametros:
-                            nombre = self.extraer_nombre(texto, parametro['expresion_regular'])
-                            if nombre:
-                                nombre = self.normalizar_nombre(nombre)
-                                if texto.__contains__(parametro['texto_verificacion']):
-                                    self.mover_archivo(archivo, nombre, parametro['prefijo'])
-                                    encontro_nombre = True
-                                    break
-                        if not encontro_nombre:
-                            msj = f"ERROR: NO encontró NOMBRE: Archivo {archivo}"
-                            logging.error(msj)
-                            print(msj)
+                    encontro_nombre = False
+                    for parametro in self.configuracion.parametros:
+                        nombre = self.extraer_nombre(texto, parametro['expresion_regular'])
+                        if nombre:
+                            nombre = self.normalizar_nombre(nombre)
+                            if texto.__contains__(parametro['texto_verificacion']):
+                                self.mover_archivo(archivo, nombre, parametro['prefijo'])
+                                encontro_nombre = True
+                                break
+                    if not encontro_nombre:
+                        msj = f"ERROR: NO encontró NOMBRE: Archivo {archivo}"
+                        logging.error(msj)
+                        print(msj)
         except Exception as e:
             logging.error("Error al procesar PDF: ", exc_info=True)
             raise e
@@ -122,8 +123,6 @@ class ProcesadorPDF:
             msj = f"ERROR - NO se movio el archivo {archivo}, hubo algun error identificando automaticamente el nombre"
             logging.error(msj)
             print(msj)
-
-
 
     def comprimir_directorios(self):
         """

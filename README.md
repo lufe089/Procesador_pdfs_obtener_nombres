@@ -14,12 +14,15 @@ Esta aplicación automatiza el procesamiento de documentos PDF relacionados con 
 
 ## Uso
 
-Doble clic en `ProcesadorDocsGrados.exe` para iniciar la aplicación. Siga las instrucciones en pantalla para procesar los documentos o comprimir los directorios.
+Doble clic en `ProcesadorDocsGrados.exe` para iniciar la aplicación. Siga las instrucciones en pantalla para procesar
+los documentos o comprimir los directorios.
 
 ## Soporte
 
 Este proyecto fue elaborado por Luisa Rincon <lfrincon@javerianacali.edu.co>
 
 ## Creacion del ejecutable
-# La opción --onefile le indica a PyInstaller que cree un único archivo ejecutable. 
+
+# La opción --onefile le indica a PyInstaller que cree un único archivo ejecutable.
+
 pyinstaller --onefile ProcesamientoDiplomas.py

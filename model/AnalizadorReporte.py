@@ -1,7 +1,7 @@
 # Continuación del código en ReporteDirectorio.py
 
 import os
-import openpyxl
+
 from openpyxl import Workbook
 
 
