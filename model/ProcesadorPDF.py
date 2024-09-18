@@ -79,13 +79,14 @@ class ProcesadorPDF:
 
                     encontro_nombre = False
                     for parametro in self.configuracion.parametros:
-                        nombre = self.extraer_nombre(texto, parametro['expresion_regular'])
-                        if nombre:
-                            nombre = self.normalizar_nombre(nombre)
-                            if texto.__contains__(parametro['texto_verificacion']):
-                                self.mover_archivo(archivo, nombre, parametro['prefijo'])
-                                encontro_nombre = True
-                                break
+                        if parametro is not None and parametro['expresion_regular'] is not None:
+                            nombre = self.extraer_nombre(texto, parametro['expresion_regular'])
+                            if nombre:
+                                nombre = self.normalizar_nombre(nombre)
+                                if texto.__contains__(parametro['texto_verificacion']):
+                                    self.mover_archivo(archivo, nombre, parametro['prefijo'])
+                                    encontro_nombre = True
+                                    break
                     if not encontro_nombre:
                         msj = f"ERROR: NO encontró NOMBRE: Archivo {archivo}"
                         logging.error(msj)
