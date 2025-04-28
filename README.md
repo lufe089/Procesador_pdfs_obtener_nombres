@@ -43,3 +43,4 @@ los documentos o comprimir los directorios.
 ### Versiones
 - 1.0.0: Versión Inicial
 - 1.0.1: Agrega validación en el caso de parametros nulos en el archivo de configuración por filas vacías y actualiza expresión regular para detectar el nombre de los diplomas
+- 1.0.2: Ajustes para considerar el renombramiento de archivos para todas las facultades. Abril 2025

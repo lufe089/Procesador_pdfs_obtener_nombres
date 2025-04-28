@@ -17,7 +17,7 @@ class Configuracion:
 
         # Lee las rutas de los PDFs y la ruta de salida desde la hoja 'Rutas'
         self.ruta_pdfs = ws['B2'].value
-        self.ruta_salida = ws['B3'].value
+        self.ruta_salida = self.ruta_pdfs+'_renombrado'
 
         ws = wb['Documentos']
         # Itera sobre cada fila de la hoja 'Documentos' para obtener los parámetros de configuración

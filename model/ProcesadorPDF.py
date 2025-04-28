@@ -25,7 +25,7 @@ class ProcesadorPDF:
         """
         # Primero, quitamos espacios al principio y al final de la cadena original
         nombre = nombre.strip()
-
+        nombre = self.limpiar_texto_extraido(nombre)
         # Normalizamos el nombre a su forma NFD. Esto separará los caracteres
         # de sus marcas diacríticas (como las tildes). Por ejemplo, "Á" se descompone en "A" y la tilde como entidades separadas.
         nombre_sin_tildes = ''.join(
@@ -40,7 +40,6 @@ class ProcesadorPDF:
         # Ahora que hemos eliminado las tildes, reemplazamos los espacios en blanco por guiones bajos
         # para normalizar aún más el nombre, haciéndolo más adecuado, por ejemplo, para nombres de archivos.
         nombre_normalizado = nombre_sin_tildes.replace(' ', '_')
-        # Devolvemos el nombre ya normalizado
         return nombre_normalizado
 
     def extraer_nombre(self, texto, expresion_regular):
@@ -61,6 +60,46 @@ class ProcesadorPDF:
             logging.error("Error al extraer el nombre: ", exc_info=True)
             raise e
 
+    def limpiar_texto_extraido(self, texto):
+        # 1. Eliminar dobles espacios o más
+        texto = re.sub(r'\s{2,}', ' ', texto)
+
+        # 2. Reemplazar patrones de palabras cortadas erróneamente (espacio dentro de una palabra de mayúsculas)
+        texto = re.sub(r'(?<=[A-ZÁÉÍÓÚÑ])\s+(?=[A-ZÁÉÍÓÚÑ])', '', texto)
+
+        # 3. Separar campos unidos sin espacio entre letras y puntos o números
+        texto = re.sub(r'([a-zA-ZÁÉÍÓÚÑ])(\d)', r'\1 \2', texto)  # Ej: "C.C.1.23..." → "C.C. 1.23..."
+        texto = re.sub(r'(\d)([A-ZÁÉÍÓÚÑ])', r'\1 \2', texto)  # Ej: "123CALI" → "123 CALI"
+
+        return texto.strip()
+
+    def descomprimir_mover(self):
+        # Descomprimir carpetas comprimidas
+        for archivo in os.listdir('.'):
+            if archivo.endswith('.zip'):
+                with zipfile.ZipFile(archivo, 'r') as zip_ref:
+                    zip_ref.extractall('.')
+                os.remove(archivo)  # Elimina el archivo ZIP después de descomprimir
+
+        # Mover todos los archivos a la raíz
+        for raiz, _, archivos in os.walk('.'):
+            for archivo in archivos:
+                ruta_actual = os.path.join(raiz, archivo)
+                if os.path.abspath(raiz) != os.path.abspath('.'):
+                    shutil.move(ruta_actual, '.')  # Mueve el archivo a la raíz
+
+        # Elimina los directorios cuando quedan vacíos
+        for raiz, directorios, _ in os.walk('.'):
+            for directorio in directorios:
+                ruta_directorio = os.path.join(raiz, directorio)
+                if os.path.abspath(ruta_directorio) != os.path.abspath('.'):
+                    try:
+                        os.rmdir(ruta_directorio)  # Elimina el directorio si está vacío
+                    except OSError:
+                        pass # No es necesario controlar ese caso
+
+
+
     def procesar(self):
         """
         Método para procesar los PDFs: cambiar directorio, buscar nombres y mover archivos
@@ -69,9 +108,13 @@ class ProcesadorPDF:
         try:
             os.chdir(self.configuracion.ruta_pdfs)
             encontro_nombre = False
-            for archivo in os.listdir('.'):
-                if archivo.endswith('.pdf'):
+            # Descomprime y mueve archivos a la raíz y elimina los directorios vacíos
+            self.descomprimir_mover()
 
+            for archivo in os.listdir('.'):
+                # El archivo no es un directorio y termina en .pdf
+                path = os.path.abspath(archivo)
+                if archivo.endswith('.pdf') and os.path.isfile(path):
                     reader = PdfReader(archivo)
                     texto = ''
                     for pagina in reader.pages:
@@ -83,6 +126,7 @@ class ProcesadorPDF:
                             nombre = self.extraer_nombre(texto, parametro['expresion_regular'])
                             if nombre:
                                 nombre = self.normalizar_nombre(nombre)
+                                # El texto de verificacion es el que verifica que en el titulo si quede el nombre que esperamos
                                 if texto.__contains__(parametro['texto_verificacion']):
                                     self.mover_archivo(archivo, nombre, parametro['prefijo'])
                                     encontro_nombre = True
@@ -121,7 +165,7 @@ class ProcesadorPDF:
             # Registra la acción de mover el archivo como información
             logging.info(f"Archivo {archivo} procesado y movido a {destino_pdf}.")
         else:
-            msj = f"ERROR - NO se movio el archivo {archivo}, hubo algun error identificando automaticamente el nombre"
+            msj = f"ERROR - NO se movio el archivo {archivo}, ya existe en el directorio de salida o no hubo un problema identificando automaticamente el nombre"
             logging.error(msj)
             print(msj)
 
