@@ -13,7 +13,7 @@ class ProcesadorPDF:
     def __init__(self, configuracion, log_path):
         self.configuracion = configuracion
         # Configura el logging para capturar información y errores.
-        destino_log = os.path.join(log_path, 'rocesador_documentos.log')
+        destino_log = os.path.join(log_path, 'procesador_documentos.log')
         logging.basicConfig(filename=destino_log, level=logging.INFO,
                             format='%(asctime)s:%(levelname)s:%(message)s')
 
